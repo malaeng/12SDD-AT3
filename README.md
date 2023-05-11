@@ -1,1 +1,2 @@
 # 12SDD-AT3
+**Task Description**: Create a program and project documentation as itemised in pg2 Marking Guidelines. This will demonstrate your communication and research skills, project management and modelling techniques and the coding skills that you have learned in this course. 
