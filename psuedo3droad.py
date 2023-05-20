@@ -40,9 +40,9 @@ def main():
                 if event.key == pygame.K_l:
                     curve_change = 0.01
                 if event.key == pygame.K_i:
-                    car_z_change = 1.0
+                    car_z_change = 0.8
                 if event.key == pygame.K_m:
-                    car_z_change = -1.0
+                    car_z_change = -0.8
 
             # doesn't work well when pressing two at a time.
             if event.type == pygame.KEYUP:
@@ -62,10 +62,10 @@ def main():
 
         # Draw mountains
         pygame.draw.polygon(gameDisplay, (114, 132, 150), [
-            (70*curve_amount, display_height/2),
-            (70*curve_amount+50, display_height/2 - 150),
-            (70*curve_amount+80, display_height/2 - 180),
-            (70*curve_amount+140, display_height/2)
+            (-0.5*curve_amount*car_z, display_height/2),
+            (-0.5*curve_amount*car_z+50, display_height/2 - 150),
+            (-0.5*curve_amount*car_z+80, display_height/2 - 180),
+            (-0.5*curve_amount*car_z+140, display_height/2)
         ])
 
 
@@ -81,7 +81,7 @@ def main():
                 (0, display_height-h*(i+1))
             ])
 
-        angle = math.radians(55.0) # convert degrees to radians because trig is done in radians in python
+        angle = math.radians(54.0) # convert degrees to radians because trig is done in radians in python
         offset = 100.0 # Distance between road and edge of screen
         
         curve_amount += curve_change
