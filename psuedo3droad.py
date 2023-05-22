@@ -35,13 +35,13 @@ def main():
                 quit()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_j:
+                if event.key == pygame.K_a:
                     curve_change = -0.01
-                if event.key == pygame.K_l:
+                if event.key == pygame.K_d:
                     curve_change = 0.01
-                if event.key == pygame.K_i:
+                if event.key == pygame.K_w:
                     car_z_change = 0.8
-                if event.key == pygame.K_m:
+                if event.key == pygame.K_s:
                     car_z_change = -0.8
 
             # doesn't work well when pressing two at a time.
