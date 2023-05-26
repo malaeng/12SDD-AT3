@@ -1,51 +1,36 @@
+# https://lospec.com/palette-list/oil-6
+
 import pygame, sys
  
 from player import Player
+from menu import Menu
 
-
+surfaces = []
 class Game:
     def __init__(self):
         # Player setup
         player_sprite = Player((screen_width / 2, screen_height - screen_height/ 8), screen_width)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
-    def quitgame(self):
-        pygame.quit()
-        quit()
+        # Main menu
+        self.main_menu = Menu((8*screen_width/9, 8*screen_height/9), '#fbf5ef', 200, (screen_width, screen_height))
+        
+        surfaces.append(self.main_menu)
 
-    def text_objects(self, text, font):
-        textSurface = font.render(text, True, 'black')
-        return textSurface, textSurface.get_rect()
+        # Fonts
+        self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
 
-    def button(self, msg,x,y,w,h,ic,ac,action=None):
-        mouse = pygame.mouse.get_pos()
-        click = pygame.mouse.get_pressed()
-
-        if x+w > mouse[0] > x and y+h > mouse[1] > y:
-            pygame.draw.rect(screen, ac,(x,y,w,h))
-            if click[0] == 1 and action != None:
-                action()         
-        else:
-            pygame.draw.rect(screen, ic,(x,y,w,h))
-        smallText = pygame.font.SysFont("comicsansms",20)
-        textSurf, textRect = self.text_objects(msg, smallText)
-        textRect.center = ( (x+(w/2)), (y+(h/2)) )
-        screen.blit(textSurf, textRect)
-
-    def start_menu(self):
-        screen.fill('white')
-        largeText = pygame.font.SysFont("comicsansms",115)
-        TextSurf, TextRect = self.text_objects("Spaceship Game", largeText)
-        TextRect.center = ((screen_width/2),(screen_height/2))
-        screen.blit(TextSurf, TextRect)
-
-        self.button("GO!",150,450,100,50,'green','blue', self.run)
-        self.button("Quit",550,450,100,50,'red','orange', self.quitgame)
+    def draw_menu(self):
+        # screen.blit(self.main_menu, (screen_width/18, screen_height/18))
+        screen.blit(self.main_menu, self.main_menu.rect)
+        self.main_menu.start_menu()
 
     def run(self):
         self.player.sprite.lasers.draw(screen)
         self.player.update()
         self.player.draw(screen)
+        self.draw_menu()
+        
         
 
 if __name__ == '__main__':
@@ -62,6 +47,8 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+                            
         
         screen.fill("#272744")
         game.run()
@@ -110,6 +97,18 @@ def text_objects(text, font):
     textSurface = font.render(text, True, black)
     return textSurface, textSurface.get_rect()
  
+    
+        def quitgame(self):
+        pygame.quit()
+        quit()
+
+    def text_objects(self, text, font):
+        textSurface = font.render(text, True, 'black')
+        return textSurface, textSurface.get_rect()
+
+
+
+
  
 def crash():
 

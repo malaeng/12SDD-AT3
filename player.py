@@ -1,6 +1,4 @@
-from typing import Iterable, Union
 import pygame
-from pygame.sprite import AbstractGroup
 from laser import Laser
 
 class Player(pygame.sprite.Sprite):
