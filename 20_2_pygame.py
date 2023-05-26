@@ -5,7 +5,7 @@ import random
 pygame.init()
 
 
-crash_sound = pygame.mixer.Sound("crash.wav")
+crash_sound = pygame.mixer.Sound("audio/crash.wav")
 
  
 display_width = 800
@@ -29,7 +29,7 @@ pygame.display.set_caption('A bit Racey')
 clock = pygame.time.Clock()
  
 carImg = pygame.image.load('graphics/racecar2.png')
-gameIcon = pygame.image.load('carIcon.png')
+gameIcon = pygame.image.load('graphics/carIcon.png')
 
 pygame.display.set_icon(gameIcon)
 
@@ -158,7 +158,7 @@ def game_intro():
 def game_loop():
     global pause
 
-    pygame.mixer.music.load('jazz.wav')
+    pygame.mixer.music.load('audio/jazz.wav')
     pygame.mixer.music.play(-1)
 
     x = (display_width * 0.45)
