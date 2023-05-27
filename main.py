@@ -5,34 +5,53 @@ import pygame, sys
 from player import Player
 from menu import Menu
 
-surfaces = []
+
 class Game:
     def __init__(self):
         # Player setup
         player_sprite = Player((screen_width / 2, screen_height - screen_height/ 8), screen_width)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
-        # Main menu
-        self.main_menu = Menu((8*screen_width/9, 8*screen_height/9), '#fbf5ef', 200, (screen_width, screen_height))
+        # Menus
+        self.main_menu = Menu(
+            size = (8*screen_width/9, 8*screen_height/9),
+            parent_surface_dimensions = (screen_width, screen_height),
+            colour = '#fbf5ef', 
+            alpha = 200, 
+            title = "Game Title",
+            buttons = ["Play", "Options", "Quit"]
+            )        
         
-        surfaces.append(self.main_menu)
+        self.pause_menu = Menu(
+            size = (8*screen_width/9, 8*screen_height/9),
+            parent_surface_dimensions = (screen_width, screen_height),
+            colour = '#fbf5ef', 
+            alpha = 200, 
+            title = "Game Title",
+            buttons = ["Continue", "Options", "Quit"]
+            )
 
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
 
         # Game
         self.game_running = False
+        self.mouse_up = False
 
     def menu(self):
-        # screen.blit(self.main_menu, (screen_width/18, screen_height/18))
         screen.blit(self.main_menu, self.main_menu.rect)
-        if self.main_menu.start_menu() == "PLAY":
+        button_pressed = self.main_menu.process()
+        #if self.mouse_up:
+        if button_pressed == 0: # Run
             self.game_running = True
             self.run()
-        elif self.main_menu.start_menu() == "OPTIONS":
-            print('options')
-        elif self.main_menu.start_menu() == "QUIT":
+        elif button_pressed == 1: #Options
+            print("options")
+        elif button_pressed == 2: #Quit
             self.quit_game()
+        self.mouse_up = False
+            #for button in self.main_menu.buttons:
+                #button.already_pressed = False
     
     def quit_game(self):
         pygame.quit()
@@ -62,6 +81,14 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    game.mouse_up = True
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game.game_running = False
 
                             
         
