@@ -22,26 +22,20 @@ class Button(pygame.Surface):
         
         mouse_pos = pygame.mouse.get_pos()
         rel_rect = pygame.Rect((button_rect.x + surface.rect.x, button_rect.y + surface.rect.y), (button_rect.width, button_rect.height))
-        #mouse_pos = (mouse_x + surface.get_rect().x, mouse_y + surface.get_rect().y)
+
         self.fill(self.colors['normal'])
         if rel_rect.collidepoint(mouse_pos):
             self.fill(self.colors['hover'])
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.fill(self.colors['pressed'])
                 if self.one_press:
-                    
-                    self.on_click_function()
+                    # self.on_click_function()
+                    return True
                     
                 elif not self.already_pressed:
-                    print("============")
-                    print('pressed')
-                    print(f'original mouse position: {pygame.mouse.get_pos()}')
-                    print(f'added: {surface.get_rect().x}, {surface.get_rect().y}')
-                    print(f'mouse position: {mouse_pos}')
-                    print(f'button_rect from get_input: {button_rect}')
-                    
-                    self.on_click_function()
+                    # self.on_click_function()
                     self.already_pressed = True
+                    return True
             else:
                 self.already_pressed = False
     
@@ -55,24 +49,45 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.set_alpha(alpha)
 
         self.rect = self.get_rect(center = (parent_surface_dimensions[0]/2, parent_surface_dimensions[1]/2))
-        print(self.rect)
+        self.width = self.get_width()
+        self.height = self.get_height()
 
         self.title_font = pygame.font.Font('graphics/pixeled.ttf', 50)
 
+
+
     def start_menu(self):
+        # Title
         title_surf = self.title_font.render('Game Title', False, 'black')
-        title_rect = title_surf.get_rect(center = (self.get_width()/2, self.get_height()/6))
+        title_rect = title_surf.get_rect(center = (self.width/2, self.height/5))
         self.blit(title_surf, title_rect)
 
-        self.play_button = Button(300, 100, "Play", self.print)
-        self.play_button_rect = self.play_button.get_rect(center = (self.get_width()/2, self.get_height()/2))
+        button_pressed = False        
 
-        #self.play_button_rect = self.play_button.get_rect()
+        # Play Button
+        self.play_button = Button(300, 100, "Play")
+        self.play_button_rect = self.play_button.get_rect(center = (self.width/2, 2*self.height/5))
         
-        self.play_button.get_input(self.play_button_rect, self)
+        if self.play_button.get_input(self.play_button_rect, self): return "PLAY"
         self.play_button.draw_text()
-        self.blit(self.play_button, (self.play_button_rect.x, self.play_button_rect.y))
+        self.blit(self.play_button, self.play_button_rect)
 
+        # Options Button
+        self.options_button = Button(300, 100, "Options")
+        self.options_button_rect = self.options_button.get_rect(center = (self.width/2, 3*self.height/5))
+
+        if self.options_button.get_input(self.options_button_rect, self): return "OPTIONS"
+        self.options_button.draw_text()
+        self.blit(self.options_button, self.options_button_rect)
+
+        # Quit Button
+        self.quit_button = Button(300, 100, "Quit")
+        self.quit_button_rect = self.quit_button.get_rect(center = (self.width/2, 4*self.height/5))
+
+        if self.quit_button.get_input(self.quit_button_rect, self): return "QUIT"
+        self.quit_button.draw_text()
+        self.blit(self.quit_button, self.quit_button_rect)
 
     def print(self):
-        print(f'button_rect from Menu: {self.play_button_rect}')
+        print("Button Press")
+

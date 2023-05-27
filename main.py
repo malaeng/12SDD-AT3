@@ -20,16 +20,31 @@ class Game:
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
 
-    def draw_menu(self):
+        # Game
+        self.game_running = False
+
+    def menu(self):
         # screen.blit(self.main_menu, (screen_width/18, screen_height/18))
         screen.blit(self.main_menu, self.main_menu.rect)
-        self.main_menu.start_menu()
+        if self.main_menu.start_menu() == "PLAY":
+            self.game_running = True
+            self.run()
+        elif self.main_menu.start_menu() == "OPTIONS":
+            print('options')
+        elif self.main_menu.start_menu() == "QUIT":
+            self.quit_game()
+    
+    def quit_game(self):
+        pygame.quit()
+        quit()
 
     def run(self):
-        self.player.sprite.lasers.draw(screen)
-        self.player.update()
-        self.player.draw(screen)
-        self.draw_menu()
+        if self.game_running == False:
+            self.menu()
+        else:
+            self.player.sprite.lasers.draw(screen)
+            self.player.update()
+            self.player.draw(screen)
         
         
 
