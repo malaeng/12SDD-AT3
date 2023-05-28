@@ -14,10 +14,11 @@ class Game:
 
         # Menus
         self.main_menu = Menu(
-            size = (8*screen_width/9, 8*screen_height/9),
+            #size = (8*screen_width/9, 8*screen_height/9),
+            size = (screen_width, screen_height),
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
-            alpha = 200, 
+            alpha = 255, 
             title = "Game Title",
             buttons = ["Play", "Options", "Quit"]
             )        
@@ -27,7 +28,7 @@ class Game:
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
             alpha = 200, 
-            title = "Game Title",
+            title = "Game Paused",
             buttons = ["Continue", "Options", "Quit"]
             )
 
@@ -36,22 +37,35 @@ class Game:
 
         # Game
         self.game_running = False
-        self.mouse_up = False
+        self.game_paused = True
+        self.mouse_state = 'PASSIVE'
 
-    def menu(self):
+    def main_menu_run(self):
         screen.blit(self.main_menu, self.main_menu.rect)
-        button_pressed = self.main_menu.process()
-        #if self.mouse_up:
+        button_pressed = self.main_menu.process(self.mouse_state)
+        #if self.mouse_state == 'PRESSED':
         if button_pressed == 0: # Run
             self.game_running = True
+            self.game_paused = False
             self.run()
         elif button_pressed == 1: #Options
             print("options")
         elif button_pressed == 2: #Quit
             self.quit_game()
-        self.mouse_up = False
-            #for button in self.main_menu.buttons:
-                #button.already_pressed = False
+
+    def pause_menu_run(self):
+        screen.blit(self.pause_menu, self.pause_menu.rect)
+        button_pressed = self.pause_menu.process(self.mouse_state)
+        if button_pressed == 0: # Continue
+            self.game_paused = False
+            self.run()
+        elif button_pressed == 1: #Options
+            print("options")
+        elif button_pressed == 2: #Quit
+            self.game_running = False
+            pygame.time.wait(100)
+            self.main_menu_run()
+
     
     def quit_game(self):
         pygame.quit()
@@ -59,7 +73,11 @@ class Game:
 
     def run(self):
         if self.game_running == False:
-            self.menu()
+            self.main_menu_run()
+        elif self.game_paused == True:
+            self.player.sprite.lasers.draw(screen)
+            self.player.draw(screen)
+            self.pause_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
             self.player.update()
@@ -82,19 +100,20 @@ if __name__ == '__main__':
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
-                    game.mouse_up = True
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    game.mouse_state = 'PRESSED'
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    game.mouse_state = 'RELEASED'
 
-            if event.type == pygame.KEYDOWN:
+
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    game.game_running = False
+                    game.game_paused = True
 
                             
         
         screen.fill("#272744")
         game.run()
-
         pygame.display.flip()
         clock.tick(60)
 

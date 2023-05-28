@@ -9,27 +9,28 @@ class Button(pygame.Surface):
         self.font = pygame.font.Font('graphics/pixeled.ttf', 10)
 
         self.colours = {
-            'normal': 'white',
-            'hover': 'red',
-            'pressed': 'green'
+            'normal': '#f2d3ab',
+            'hover': '#c69fa5',
+            'pressed': '#8b6d9c'
         }
 
         self.text_surf = self.font.render(button_text, True, (20, 20, 20))
         self.text_rect = self.text_surf.get_rect(center = (self.get_width()/2, self.get_height()/2))
 
-    def get_input(self, button_rect, surface):
-        
+    def get_input(self, button_rect, surface, mouse_state):
         mouse_pos = pygame.mouse.get_pos()
         rel_rect = pygame.Rect((button_rect.x + surface.rect.x, button_rect.y + surface.rect.y), (button_rect.width, button_rect.height))
 
         self.fill(self.colours['normal'])
         if rel_rect.collidepoint(mouse_pos):
             self.fill(self.colours['hover'])
-            if pygame.mouse.get_pressed(num_buttons=3)[0]:
+            if mouse_state == 'PRESSED':
+                self.fill(self.colours['pressed'])
                 self.already_pressed = True
-                return True
-            #else:
+            if mouse_state == 'RELEASED' and self.already_pressed:
                 self.already_pressed = False
+                return True
+            
     
     def draw_text(self):
         self.blit(self.text_surf, self.text_rect)
@@ -54,7 +55,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.button_titles = buttons
         self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
 
-    def process(self):
+    def process(self, mouse_state):
         # Title
         title_surf = self.title_font.render(self.title, False, 'black')
         title_rect = title_surf.get_rect(center = (self.width/2, self.height/5))
@@ -64,8 +65,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         for button in self.buttons:
             index = self.buttons.index(button)
             button_rect = button.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
-            pygame.event.clear()
-            if button.get_input(button_rect, self): 
+            if button.get_input(button_rect, self, mouse_state): 
                 return index
             button.draw_text()
             self.blit(button, button_rect)
