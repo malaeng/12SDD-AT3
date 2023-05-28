@@ -1,5 +1,6 @@
 import pygame
 from laser import Laser
+import random
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, constraint):
@@ -14,6 +15,12 @@ class Player(pygame.sprite.Sprite):
         self.cooldown = 150
 
         self.lasers = pygame.sprite.Group()
+
+        # Audio
+        self.laser_SFX_01 = pygame.mixer.Sound('audio/laserSmall_001.ogg')
+        self.laser_SFX_02 = pygame.mixer.Sound('audio/laserSmall_002.ogg')
+        self.laser_SFX_03 = pygame.mixer.Sound('audio/laserSmall_003.ogg')
+        self.laser_SFX_04 = pygame.mixer.Sound('audio/laserSmall_004.ogg')
 
     def get_input(self):
         # Instead of checking for key_down and key_up as in the tutorial, stores all keys as a true or false value, for if they are being pressed or not.
@@ -36,6 +43,7 @@ class Player(pygame.sprite.Sprite):
             self.time_shot = pygame.time.get_ticks()
 
     def shoot(self):
+        pygame.mixer.Sound.play(self.laser_SFX_01)
         self.lasers.add(Laser(self.rect.center, -16, self.rect.bottom))
 
     def recharge(self):

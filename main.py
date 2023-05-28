@@ -29,11 +29,13 @@ class Game:
             colour = '#fbf5ef', 
             alpha = 200, 
             title = "Game Paused",
-            buttons = ["Continue", "Options", "Quit"]
+            buttons = ["Continue", "Options", "Quit to Menu"]
             )
 
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
+
+
 
         # Game
         self.game_running = False
@@ -93,6 +95,7 @@ if __name__ == '__main__':
     pygame.display.set_caption("Space game [to be renamed]")
     clock = pygame.time.Clock()
     game = Game()
+
 
     while True:
         for event in pygame.event.get():
