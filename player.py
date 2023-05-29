@@ -22,6 +22,8 @@ class Player(pygame.sprite.Sprite):
         self.laser_SFX_03 = pygame.mixer.Sound('audio/laserSmall_003.ogg')
         self.laser_SFX_04 = pygame.mixer.Sound('audio/laserSmall_004.ogg')
 
+        self.laser_SFX_02.set_volume(0.3)
+
     def get_input(self):
         # Instead of checking for key_down and key_up as in the tutorial, stores all keys as a true or false value, for if they are being pressed or not.
         # To react to input, a pre-test loop checks if the value of a certain key is true - if it is being pressed
@@ -43,7 +45,7 @@ class Player(pygame.sprite.Sprite):
             self.time_shot = pygame.time.get_ticks()
 
     def shoot(self):
-        pygame.mixer.Sound.play(self.laser_SFX_01)
+        pygame.mixer.Sound.play(self.laser_SFX_02)
         self.lasers.add(Laser(self.rect.center, -16, self.rect.bottom))
 
     def recharge(self):

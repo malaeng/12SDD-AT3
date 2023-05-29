@@ -1,20 +1,26 @@
 import pygame
 
 class Button(pygame.Surface):
-    def __init__(self, width: int, height: int, button_text: str, on_click_function=None):
+    def __init__(self, width: int, height: int, button_text: str):
         super().__init__((width, height))
-        self.on_click_function = on_click_function
+
+        # Flags
         self.already_pressed = False
         self.already_hovered = False
 
-        self.font = pygame.font.Font('graphics/pixeled.ttf', 10)
+        # Border
+        self.border_surf = pygame.Surface((width+6, height+6))
+        self.border_surf.fill('black')
 
+        # Colours
         self.colours = {
             'normal': '#f2d3ab',
             'hover': '#c69fa5',
             'pressed': '#8b6d9c'
         }
 
+        # Text
+        self.font = pygame.font.Font('graphics/PressStart2P.ttf', 16)
         self.text_surf = self.font.render(button_text, True, (20, 20, 20))
         self.text_rect = self.text_surf.get_rect(center = (self.get_width()/2, self.get_height()/2))
 
@@ -27,18 +33,27 @@ class Button(pygame.Surface):
 
     def get_input(self, button_rect, surface, mouse_state):
         mouse_pos = pygame.mouse.get_pos()
-        rel_rect = pygame.Rect((button_rect.x + surface.rect.x, button_rect.y + surface.rect.y), (button_rect.width, button_rect.height))
+        # The button's x and y coordinates are relative to the parent surface. 
+        # However, the mouse_pos is not, so the x and y values of the parent surface are added to ensure it lines up correctly with the mouse_pos
+        # Note that this currently only works if the button only has one parent surface. 
+        # If the button was drawn on a surface on another surface, it would not work correctly
+        real_rect = pygame.Rect((button_rect.x + surface.rect.x, button_rect.y + surface.rect.y), (button_rect.width, button_rect.height))
 
         self.fill(self.colours['normal'])
-        if rel_rect.collidepoint(mouse_pos):
+
+        # If statements check if the button is being hovered over, pressed, and released.
+        # Flags ensure some actions only occur once (e.g. playing sound)
+        if real_rect.collidepoint(mouse_pos): # If the mouse is over the button
             self.fill(self.colours['hover'])
             if not self.already_hovered: pygame.mixer.Sound.play(self.hover_SFX)
             self.already_hovered = True
-            if mouse_state == 'PRESSED':
+
+            if mouse_state == 'PRESSED': # If the button has been pressed
                 if not self.already_pressed: pygame.mixer.Sound.play(self.click_down_SFX)
                 self.fill(self.colours['pressed'])
                 self.already_pressed = True
-            if mouse_state == 'RELEASED' and self.already_pressed:
+            
+            if mouse_state == 'RELEASED' and self.already_pressed: # If the button has been released
                 pygame.mixer.Sound.play(self.click_up_SFX)
                 self.already_pressed = False
                 return True
@@ -62,7 +77,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.height = self.get_height()
 
         # Title
-        self.title_font = pygame.font.Font('graphics/pixeled.ttf', 50)
+        self.title_font = pygame.font.Font('graphics/PressStart2P.ttf', 50)
         self.title = title
 
         # Buttons
@@ -79,12 +94,14 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         for button in self.buttons:
             index = self.buttons.index(button)
             button_rect = button.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
-            if button.get_input(button_rect, self, mouse_state): 
-                return index
+            button_border_rect = button.border_surf.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
+
+            # Returns the index of the button if it has been pressed and released
+            if button.get_input(button_rect, self, mouse_state): return index
+
+            # Draw buttons
             button.draw_text()
+            self.blit(button.border_surf, button_border_rect)
             self.blit(button, button_rect)
 
-
-    def print(self):
-        print("Button Press")
 

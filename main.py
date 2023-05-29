@@ -1,9 +1,14 @@
 # https://lospec.com/palette-list/oil-6
+# https://www.dafont.com/press-start-2p.font
+# https://www.kenney.nl/assets/sci-fi-sounds 
+# https://www.kenney.nl/assets/interface-sounds
 
-import pygame, sys
+
+import pygame, sys, random
  
 from player import Player
 from menu import Menu
+from enemy import Asteroid
 
 
 class Game:
@@ -12,9 +17,13 @@ class Game:
         player_sprite = Player((screen_width / 2, screen_height - screen_height/ 8), screen_width)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
+        # Enemies
+        self.enemies = pygame.sprite.Group()
+        self.time_spawned = 0
+        self.spawn_cooldown = 1000
+
         # Menus
         self.main_menu = Menu(
-            #size = (8*screen_width/9, 8*screen_height/9),
             size = (screen_width, screen_height),
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
@@ -35,9 +44,7 @@ class Game:
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
 
-
-
-        # Game
+        # Flags
         self.game_running = False
         self.game_paused = True
         self.mouse_state = 'PASSIVE'
@@ -63,12 +70,23 @@ class Game:
             self.run()
         elif button_pressed == 1: #Options
             print("options")
-        elif button_pressed == 2: #Quit
+        elif button_pressed == 2: #Quit 
             self.game_running = False
             pygame.time.wait(100)
             self.main_menu_run()
 
-    
+    def enemy_handler(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.time_spawned >= self.spawn_cooldown:
+            self.spawn_enemy()
+        self.enemies.update()
+
+    def spawn_enemy(self):
+        self.time_spawned = pygame.time.get_ticks()
+        spawn_x = random.randint(0, screen_width)
+        self.enemies.add(Asteroid((spawn_x, -20)))
+
+
     def quit_game(self):
         pygame.quit()
         quit()
@@ -82,15 +100,16 @@ class Game:
             self.pause_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
+            
             self.player.update()
             self.player.draw(screen)
-        
-        
-
+            self.enemy_handler()
+            self.enemies.draw(screen)
+           
 if __name__ == '__main__':
     pygame.init()
-    screen_width = 1200
-    screen_height = 900
+    screen_width = 960
+    screen_height = 720
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("Space game [to be renamed]")
     clock = pygame.time.Clock()
