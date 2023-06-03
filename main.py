@@ -8,7 +8,7 @@ import pygame, sys, random
  
 from player import Player
 from menu import Menu
-from enemy import Asteroid
+from enemy import Asteroid, Enemy
 
 
 class Game:
@@ -29,7 +29,8 @@ class Game:
             colour = '#fbf5ef', 
             alpha = 255, 
             title = "Game Title",
-            buttons = ["Play", "Options", "Quit"]
+            buttons = ["Play", "Options", "Quit"],
+            stack = True
             )        
         
         self.pause_menu = Menu(
@@ -38,8 +39,19 @@ class Game:
             colour = '#fbf5ef', 
             alpha = 200, 
             title = "Game Paused",
-            buttons = ["Continue", "Options", "Quit to Menu"]
+            buttons = ["Continue", "Options", "Quit to Menu"],
+            stack = True
             )
+        
+        self.upgrade_menu = Menu(
+            size = (2*screen_width/3, 2*screen_height/3),
+            parent_surface_dimensions = (screen_width, screen_height),
+            colour = '#fbf5ef', 
+            alpha = 200, 
+            title = "Choose Upgrade",
+            buttons = ["Upgrade 1", "Upgrade 2"],
+            stack = False
+        )
 
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
@@ -75,6 +87,18 @@ class Game:
             pygame.time.wait(100)
             self.main_menu_run()
 
+    def upgrade_menu_run(self):
+        screen.blit(self.upgrade_menu, self.upgrade_menu.rect)
+        button_pressed = self.pause_menu.process(self.mouse_state)
+        if button_pressed == 0:
+            # apply upgrade
+            self.game_paused = False
+            self.run()
+        elif button_pressed == 1:
+            # apply upgrade
+            self.game_paused = False
+            self.run()
+
     def enemy_handler(self):
         current_time = pygame.time.get_ticks()
         if current_time - self.time_spawned >= self.spawn_cooldown:
@@ -84,8 +108,18 @@ class Game:
     def spawn_enemy(self):
         self.time_spawned = pygame.time.get_ticks()
         spawn_x = random.randint(0, screen_width)
-        self.enemies.add(Asteroid((spawn_x, -20)))
+        #self.enemies.add(Asteroid((spawn_x, -20)))
+        self.enemies.add(Enemy('science', (spawn_x, -20), screen_height))
 
+    def collision_checks(self):
+        if self.player.sprite.lasers:
+            for laser in self.player.sprite.lasers:
+                # Enemy collisions
+                enemies_hit = pygame.sprite.spritecollide(laser, self.enemies, False)
+                if enemies_hit:
+                    for enemy in enemies_hit:
+                        enemy.take_damage(50)
+                    laser.kill()
 
     def quit_game(self):
         pygame.quit()
@@ -100,11 +134,14 @@ class Game:
             self.pause_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
+            for enemy in self.enemies:
+                enemy.lasers.draw(screen)
             
             self.player.update()
             self.player.draw(screen)
             self.enemy_handler()
             self.enemies.draw(screen)
+            self.collision_checks()
            
 if __name__ == '__main__':
     pygame.init()
@@ -122,18 +159,18 @@ if __name__ == '__main__':
                 pygame.quit()
                 sys.exit()
 
+            # Mousebutton state of left-click
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     game.mouse_state = 'PRESSED'
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     game.mouse_state = 'RELEASED'
 
-
+            # Pause game
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key in [pygame.K_ESCAPE, pygame.K_p]:
                     game.game_paused = True
 
-                            
-        
+
         screen.fill("#272744")
         game.run()
         pygame.display.flip()

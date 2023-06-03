@@ -1,5 +1,10 @@
 import pygame
 
+# The Button function from the original tutorial was functional, but I rewrote it for a few reasons:
+# - It does not have separate actions for pressing and releasing the button
+# - The collisions did not use pygame's 'collidepoint' function, and so were less readablel
+# - The exact size and location had to be defined on creation, instead of being separated in surfaces and rects which are easier to manipulate
+# - It was not a separate Class, so not as object-orientated, and so doens't integrate as well with the rest of my code.
 class Button(pygame.Surface):
     def __init__(self, width: int, height: int, button_text: str):
         super().__init__((width, height))
@@ -31,7 +36,7 @@ class Button(pygame.Surface):
         self.hover_SFX = pygame.mixer.Sound('audio/glass_006.ogg')
         self.hover_SFX.set_volume(0.1)
 
-    def get_input(self, button_rect, surface, mouse_state):
+    def get_input(self, button_rect: pygame.rect, surface: pygame.surface, mouse_state: str):
         mouse_pos = pygame.mouse.get_pos()
         # The button's x and y coordinates are relative to the parent surface. 
         # However, the mouse_pos is not, so the x and y values of the parent surface are added to ensure it lines up correctly with the mouse_pos
@@ -65,8 +70,11 @@ class Button(pygame.Surface):
         self.blit(self.text_surf, self.text_rect)
 
 class Menu(pygame.Surface): # Menu inherits from pygame.Surface
-    def __init__(self, size: tuple, parent_surface_dimensions: tuple, colour: str, alpha: int, title: str, buttons: list):
+    def __init__(self, size: tuple, parent_surface_dimensions: tuple, colour: str, alpha: int, title: str, buttons: list, stack: bool):
         super().__init__(size)
+
+        self.stack = stack
+
         # Color
         self.fill(colour)
         self.set_alpha(alpha)
@@ -82,20 +90,28 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
 
         # Buttons
         self.button_titles = buttons
-        self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
+        if self.stack:
+            self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
+        elif not self.stack:
+            self.buttons = [Button(200, 200, self.button_titles[i]) for i in range(len(self.button_titles))]
 
-    def process(self, mouse_state):
+        
+
+    def process(self, mouse_state: str) -> int:
         # Title
         title_surf = self.title_font.render(self.title, False, 'black')
         title_rect = title_surf.get_rect(center = (self.width/2, self.height/5))
-        self.blit(title_surf, title_rect)     
+        self.blit(title_surf, title_rect)
 
         
         for button in self.buttons:
             index = self.buttons.index(button)
-            button_rect = button.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
-            button_border_rect = button.border_surf.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
-
+            if self.stack:
+                button_rect = button.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
+                button_border_rect = button.border_surf.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
+            elif not self.stack:
+                button_rect = button.get_rect(center = (((index+1) * self.width) / (len(self.buttons)+1), self.width/2))
+                button_border_rect = button.border_surf.get_rect(center = (((index+1) * self.width) / (len(self.buttons)+1), self.width/2))
             # Returns the index of the button if it has been pressed and released
             if button.get_input(button_rect, self, mouse_state): return index
 

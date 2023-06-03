@@ -3,7 +3,7 @@ from laser import Laser
 import random
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, constraint):
+    def __init__(self, pos: tuple, constraint: int):
         super().__init__()
         self.image = pygame.image.load('graphics/player.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = pos)
@@ -46,7 +46,7 @@ class Player(pygame.sprite.Sprite):
 
     def shoot(self):
         pygame.mixer.Sound.play(self.laser_SFX_02)
-        self.lasers.add(Laser(self.rect.center, -16, self.rect.bottom))
+        self.lasers.add(Laser(self.rect.center, (0, -16), self.rect.bottom))
 
     def recharge(self):
         if not self.charged:
