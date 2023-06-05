@@ -70,7 +70,7 @@ class Button(pygame.Surface):
         self.blit(self.text_surf, self.text_rect)
 
 class Menu(pygame.Surface): # Menu inherits from pygame.Surface
-    def __init__(self, size: tuple, parent_surface_dimensions: tuple, colour: str, alpha: int, title: str, buttons: list, stack: bool):
+    def __init__(self, size: tuple, title_size: int, parent_surface_dimensions: tuple, colour: str, alpha: int, title: str, text: list, buttons: list, stack: bool):
         super().__init__(size)
 
         self.stack = stack
@@ -85,8 +85,12 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.height = self.get_height()
 
         # Title
-        self.title_font = pygame.font.Font('graphics/PressStart2P.ttf', 50)
+        self.title_font = pygame.font.Font('graphics/PressStart2P.ttf', title_size)
         self.title = title
+
+        # Text
+        self.text_elements = text
+        
 
         # Buttons
         self.button_titles = buttons

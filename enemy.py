@@ -27,12 +27,12 @@ class Asteroid(pygame.sprite.Sprite):
         self.destroy()
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, name: str, pos: tuple, screen_height: int):
+    def __init__(self, name: str, pos: tuple, screen_height: int, laser_group: pygame.sprite.Group):
         super().__init__()
         self.enemy_data = {
             'fighter': {'health': 100, 'speed': 5, 'attack_type': 'basic', 'cooldown': (800, 1200), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_fighter.png'},
             'scout': {'health': 80, 'speed': 10, 'attack_type': 'basic', 'cooldown': (700, 1500), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_scout.png'},
-            'science': {'health': 60, 'speed': 6, 'attack_type': 'spread', 'cooldown': (900, 1500), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_science.png'}
+            'science': {'health': 60, 'speed': 6, 'attack_type': 'spread', 'cooldown': (1200, 1600), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_science.png'}
         }
         self.type = self.enemy_data[name]
 
@@ -42,12 +42,14 @@ class Enemy(pygame.sprite.Sprite):
 
         
         self.health = self.type['health']
+        self.max_health = self.health
         self.screen_height = screen_height
         self.chosen_position = False
         self.move_position = 0
 
         # Lasers
-        self.lasers = pygame.sprite.Group()
+        # self.lasers = pygame.sprite.Group()
+        self.game_laser_group = laser_group
         self.time_shot = 0
 
         # Audio
@@ -69,7 +71,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def take_damage(self, damage: int):
         self.health -= damage
-        self.image.set_alpha(200)
+        self.image.set_alpha(255*self.health/self.max_health)
         if self.health <= 0: self.kill()
 
     def shoot(self):
@@ -77,14 +79,14 @@ class Enemy(pygame.sprite.Sprite):
         attack_type = self.type['attack_type']
         if attack_type == 'basic':
             pygame.mixer.Sound.play(self.attack_SFX)
-            self.lasers.add(Laser(self.rect.center, (0, 16), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (0, 16), self.screen_height))
         elif attack_type == 'burst':
             pass
         elif attack_type == 'spread':
             pygame.mixer.Sound.play(self.attack_SFX)
-            self.lasers.add(Laser(self.rect.center, (0, 16), self.screen_height))
-            self.lasers.add(Laser(self.rect.center, (-12, 8), self.screen_height))
-            self.lasers.add(Laser(self.rect.center, (12, 8), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (0, 16), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (-12, 8), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (12, 8), self.screen_height))
 
     def update(self):
         current_time = pygame.time.get_ticks()
@@ -92,6 +94,6 @@ class Enemy(pygame.sprite.Sprite):
             self.shoot()
         self.move()
         #self.shoot()
-        self.lasers.update()
+        #self.lasers.update()
 
 

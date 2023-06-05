@@ -8,6 +8,9 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('graphics/player.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = pos)
         self.speed = 8
+        self.damage = 20
+        self.health = 500
+        self.max_health = self.health
         self.max_x_constraint = constraint
 
         self.charged = True
@@ -15,6 +18,8 @@ class Player(pygame.sprite.Sprite):
         self.cooldown = 150
 
         self.lasers = pygame.sprite.Group()
+
+
 
         # Audio
         self.laser_SFX_01 = pygame.mixer.Sound('audio/laserSmall_001.ogg')
@@ -60,11 +65,54 @@ class Player(pygame.sprite.Sprite):
         if self.rect.right >= self.max_x_constraint:
             self.rect.right = self.max_x_constraint
 
+    def take_damage(self, damage):
+        self.health -= damage
+        self.image.set_alpha(200)
+        if self.health <= 0: 
+            pass
+
     def update(self):
         self.get_input()
         self.constraint()
         self.recharge()
         self.lasers.update()
         
+class Healthbar(pygame.Surface):
+    def __init__(self, pos:tuple, size: tuple, percent: float):
+        super().__init__(size)
+        self.width = size[0]
+        self.height = size[1]
+        self.health_percent = percent
+        self.colours = {
+            'border': '#fbf5ef',
+            'hi_health': '#8b6d9c',
+            'lo_health': '#c69fa5'
+        }
+        self.pos = pos
+
+        self.fill(self.colours['border'])
+        #self.update(self.health_percent)
+        #self.percent_image = pygame.Surface((self.width*percent-8, self.height-8))
+        #self.percent_image.fill((random.choice(('red', 'blue'))))
         
+
+    def process(self, percent: float):
+        if percent >= 0 :
+            print(percent)
+            self.percent_image = pygame.Surface((self.width-8, self.height-8))
+            self.percent_image = pygame.transform.scale_by(self.percent_image, (percent, 1))
+            self.percent_image.fill(self.colours['hi_health' if percent > 0.3 else 'lo_health'])
+            self.percent_image_rect = self.percent_image.get_rect(topleft = (4, 4))
+            self.fill(self.colours['border'])
+            self.blit(self.percent_image, self.percent_image_rect)
+
+
+
+
+
+
+
+
+
+
 

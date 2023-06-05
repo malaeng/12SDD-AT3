@@ -6,7 +6,7 @@
 
 import pygame, sys, random
  
-from player import Player
+from player import Player, Healthbar
 from menu import Menu
 from enemy import Asteroid, Enemy
 
@@ -17,38 +17,49 @@ class Game:
         player_sprite = Player((screen_width / 2, screen_height - screen_height/ 8), screen_width)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
+        self.player_healthbar = Healthbar((screen_width / 5, 14*screen_height/15), (300, 30), 1)
+        self.player_healthbar_rect = self.player_healthbar.get_rect(center = (screen_width / 5, 14*screen_height/15))
+
         # Enemies
         self.enemies = pygame.sprite.Group()
         self.time_spawned = 0
-        self.spawn_cooldown = 1000
+        self.spawn_cooldown = 2000
+
+        self.enemy_lasers = pygame.sprite.Group()
 
         # Menus
         self.main_menu = Menu(
             size = (screen_width, screen_height),
+            title_size = 50,
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
             alpha = 255, 
             title = "Game Title",
+            text = [],
             buttons = ["Play", "Options", "Quit"],
             stack = True
             )        
         
         self.pause_menu = Menu(
             size = (8*screen_width/9, 8*screen_height/9),
+            title_size = 50,
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
             alpha = 200, 
             title = "Game Paused",
+            text = [],
             buttons = ["Continue", "Options", "Quit to Menu"],
             stack = True
             )
         
         self.upgrade_menu = Menu(
             size = (2*screen_width/3, 2*screen_height/3),
+            title_size = 50,
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
             alpha = 200, 
             title = "Choose Upgrade",
+            text = [],
             buttons = ["Upgrade 1", "Upgrade 2"],
             stack = False
         )
@@ -109,7 +120,7 @@ class Game:
         self.time_spawned = pygame.time.get_ticks()
         spawn_x = random.randint(0, screen_width)
         #self.enemies.add(Asteroid((spawn_x, -20)))
-        self.enemies.add(Enemy('science', (spawn_x, -20), screen_height))
+        self.enemies.add(Enemy('science', (spawn_x, -20), screen_height, self.enemy_lasers))
 
     def collision_checks(self):
         if self.player.sprite.lasers:
@@ -118,8 +129,16 @@ class Game:
                 enemies_hit = pygame.sprite.spritecollide(laser, self.enemies, False)
                 if enemies_hit:
                     for enemy in enemies_hit:
-                        enemy.take_damage(50)
+                        enemy.take_damage(self.player.sprite.damage)
                     laser.kill()
+        if self.enemy_lasers:
+            for laser in self.enemy_lasers:
+                if pygame.sprite.spritecollide(laser, self.player, False):
+                    laser.kill()
+                    print('player hit')
+                    self.player.sprite.health -= 50
+                    if self.player.sprite.health <= 0:
+                        print('game over')
 
     def quit_game(self):
         pygame.quit()
@@ -134,14 +153,24 @@ class Game:
             self.pause_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
-            for enemy in self.enemies:
-                enemy.lasers.draw(screen)
+            screen.blit(self.player_healthbar, self.player_healthbar_rect)
+            # for enemy in self.enemies:
+            #     enemy.lasers.draw(screen)
             
             self.player.update()
             self.player.draw(screen)
             self.enemy_handler()
             self.enemies.draw(screen)
             self.collision_checks()
+            
+            
+            self.player_healthbar.process((self.player.sprite.health/self.player.sprite.max_health))
+            # self.player_healthbar.blit(self.player_healthbar.percent_image, self.player_healthbar.percent_rect)
+
+            
+            self.enemy_lasers.update()
+            self.enemy_lasers.draw(screen)
+            
            
 if __name__ == '__main__':
     pygame.init()
