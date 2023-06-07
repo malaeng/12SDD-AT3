@@ -98,11 +98,11 @@ class Healthbar(pygame.Surface):
 
     def process(self, percent: float):
         if percent >= 0 :
-            print(percent)
             self.percent_image = pygame.Surface((self.width-8, self.height-8))
             self.percent_image = pygame.transform.scale_by(self.percent_image, (percent, 1))
             self.percent_image.fill(self.colours['hi_health' if percent > 0.3 else 'lo_health'])
             self.percent_image_rect = self.percent_image.get_rect(topleft = (4, 4))
+
             self.fill(self.colours['border'])
             self.blit(self.percent_image, self.percent_image_rect)
 

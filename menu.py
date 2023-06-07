@@ -6,12 +6,17 @@ import pygame
 # - The exact size and location had to be defined on creation, instead of being separated in surfaces and rects which are easier to manipulate
 # - It was not a separate Class, so not as object-orientated, and so doens't integrate as well with the rest of my code.
 class Button(pygame.Surface):
-    def __init__(self, width: int, height: int, button_text: str):
+    def __init__(self, width: int, height: int, button_text: str, toggle_text=None):
         super().__init__((width, height))
 
         # Flags
         self.already_pressed = False
         self.already_hovered = False
+        self.toggled = False
+        if toggle_text: 
+            self.is_toggle = True
+        else:
+            self.is_toggle = False
 
         # Border
         self.border_surf = pygame.Surface((width+6, height+6))
@@ -21,13 +26,16 @@ class Button(pygame.Surface):
         self.colours = {
             'normal': '#f2d3ab',
             'hover': '#c69fa5',
-            'pressed': '#8b6d9c'
+            'pressed': '#8b6d9c',
+            'toggled': '#8b6d9c'
         }
 
         # Text
         self.font = pygame.font.Font('graphics/PressStart2P.ttf', 16)
         self.text_surf = self.font.render(button_text, True, (20, 20, 20))
         self.text_rect = self.text_surf.get_rect(center = (self.get_width()/2, self.get_height()/2))
+        self.button_text = button_text
+        self.toggle_text = toggle_text
 
         # Audio
         self.click_down_SFX = pygame.mixer.Sound("audio/click_002.ogg")
@@ -44,7 +52,8 @@ class Button(pygame.Surface):
         # If the button was drawn on a surface on another surface, it would not work correctly
         real_rect = pygame.Rect((button_rect.x + surface.rect.x, button_rect.y + surface.rect.y), (button_rect.width, button_rect.height))
 
-        self.fill(self.colours['normal'])
+        if self.toggled: self.fill(self.colours['toggled'])
+        else: self.fill(self.colours['normal'])
 
         # If statements check if the button is being hovered over, pressed, and released.
         # Flags ensure some actions only occur once (e.g. playing sound)
@@ -61,6 +70,15 @@ class Button(pygame.Surface):
             if mouse_state == 'RELEASED' and self.already_pressed: # If the button has been released
                 pygame.mixer.Sound.play(self.click_up_SFX)
                 self.already_pressed = False
+                if self.is_toggle: 
+                    if self.toggled: 
+                        self.toggled = False
+                        self.text_surf = self.font.render(self.button_text, True, (20, 20, 20))
+                        self.text_rect = self.text_surf.get_rect(center = (self.get_width()/2, self.get_height()/2))
+                    else: 
+                        self.toggled = True
+                        self.text_surf = self.font.render(self.toggle_text, True, (20, 20, 20))
+                        self.text_rect = self.text_surf.get_rect(center = (self.get_width()/2, self.get_height()/2))
                 return True
         else:
             self.already_hovered = False
@@ -84,6 +102,11 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.width = self.get_width()
         self.height = self.get_height()
 
+        self.total_elements = (len(text) + len(buttons) + 2)*2
+        self.element_centers = [(i * (self.height/self.total_elements)) for i in range(self.total_elements)]
+        self.current_center = 1
+
+
         # Title
         self.title_font = pygame.font.Font('graphics/PressStart2P.ttf', title_size)
         self.title = title
@@ -91,31 +114,53 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         # Text
         self.text_elements = text
         
+        self.text_surfs = []
+        for i in self.text_elements:
+            self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
+            self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
+            
 
         # Buttons
-        self.button_titles = buttons
-        if self.stack:
-            self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
-        elif not self.stack:
-            self.buttons = [Button(200, 200, self.button_titles[i]) for i in range(len(self.button_titles))]
+        # self.button_titles = buttons
+        # if self.stack:
+        #     self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
+        # elif not self.stack:
+        #     self.buttons = [Button(200, 200, self.button_titles[i]) for i in range(len(self.button_titles))]
+
+        self.buttons = buttons
 
         
 
     def process(self, mouse_state: str) -> int:
+        self.current_center = 2
         # Title
         title_surf = self.title_font.render(self.title, False, 'black')
-        title_rect = title_surf.get_rect(center = (self.width/2, self.height/5))
+        title_rect = title_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+        self.current_center += 2
         self.blit(title_surf, title_rect)
 
+
+
+        # Text
+        if self.text_surfs:
+            for text_surf in self.text_surfs:
+                index = self.text_surfs.index(text_surf)
+                text_rect = text_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+                if self.text_elements[index][1] >= 16 and index+1 == len(self.text_surfs): self.current_center += 2
+                else: self.current_center += 1
+                self.blit(text_surf, text_rect)
         
+        # Buttons
         for button in self.buttons:
             index = self.buttons.index(button)
             if self.stack:
-                button_rect = button.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
-                button_border_rect = button.border_surf.get_rect(center = (self.width/2, ((index+2) * self.height) / (len(self.buttons)+2)))
+                button_rect = button.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+                button_border_rect = button.border_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+                self.current_center += 2
             elif not self.stack:
-                button_rect = button.get_rect(center = (((index+1) * self.width) / (len(self.buttons)+1), self.width/2))
-                button_border_rect = button.border_surf.get_rect(center = (((index+1) * self.width) / (len(self.buttons)+1), self.width/2))
+                button_rect = button.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+                button_border_rect = button.border_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+                self.current_center += 2
             # Returns the index of the button if it has been pressed and released
             if button.get_input(button_rect, self, mouse_state): return index
 
@@ -123,5 +168,6 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
             button.draw_text()
             self.blit(button.border_surf, button_border_rect)
             self.blit(button, button_rect)
+        
 
 

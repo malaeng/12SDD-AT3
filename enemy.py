@@ -29,10 +29,14 @@ class Asteroid(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, name: str, pos: tuple, screen_height: int, laser_group: pygame.sprite.Group):
         super().__init__()
+
+        self.asteroid_images = ['graphics/asteroid1.png', 'graphics/asteroid2.png', 'graphics/asteroid3.png']
+        # All avaliable enemy types
         self.enemy_data = {
+            'asteroid': {'health': 300, 'speed': 3, 'attack_type': None, 'cooldown': None, 'attack_sound': None, 'image': random.choice(self.asteroid_images)},
             'fighter': {'health': 100, 'speed': 5, 'attack_type': 'basic', 'cooldown': (800, 1200), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_fighter.png'},
             'scout': {'health': 80, 'speed': 10, 'attack_type': 'basic', 'cooldown': (700, 1500), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_scout.png'},
-            'science': {'health': 60, 'speed': 6, 'attack_type': 'spread', 'cooldown': (1200, 1600), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_science.png'}
+            'science': {'health': 60, 'speed': 6, 'attack_type': 'spread', 'cooldown': (1600, 2000), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_science.png'}
         }
         self.type = self.enemy_data[name]
 
@@ -53,8 +57,9 @@ class Enemy(pygame.sprite.Sprite):
         self.time_shot = 0
 
         # Audio
-        self.attack_SFX = pygame.mixer.Sound(self.type['attack_sound'])
-        self.attack_SFX.set_volume(0.05)
+        if self.type['attack_sound']:
+            self.attack_SFX = pygame.mixer.Sound(self.type['attack_sound'])
+            self.attack_SFX.set_volume(0.05)
 
     
     def move(self):
@@ -84,14 +89,15 @@ class Enemy(pygame.sprite.Sprite):
             pass
         elif attack_type == 'spread':
             pygame.mixer.Sound.play(self.attack_SFX)
-            self.game_laser_group.add(Laser(self.rect.center, (0, 16), self.screen_height))
-            self.game_laser_group.add(Laser(self.rect.center, (-12, 8), self.screen_height))
-            self.game_laser_group.add(Laser(self.rect.center, (12, 8), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (0, 12), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (-8, 6), self.screen_height))
+            self.game_laser_group.add(Laser(self.rect.center, (8, 6), self.screen_height))
 
     def update(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.time_shot >= random.randint(self.type['cooldown'][0], self.type['cooldown'][1]):
-            self.shoot()
+        if self.type['cooldown']:
+            if current_time - self.time_shot >= random.randint(self.type['cooldown'][0], self.type['cooldown'][1]):
+                self.shoot()
         self.move()
         #self.shoot()
         #self.lasers.update()
