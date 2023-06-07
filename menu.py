@@ -146,7 +146,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
             for text_surf in self.text_surfs:
                 index = self.text_surfs.index(text_surf)
                 text_rect = text_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
-                if self.text_elements[index][1] >= 16 and index+1 == len(self.text_surfs): self.current_center += 2
+                if self.text_elements[index][1] >= 16 and index+1 == len(self.text_surfs): self.current_center += 3
                 else: self.current_center += 1
                 self.blit(text_surf, text_rect)
         

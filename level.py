@@ -6,18 +6,22 @@ class Level:
     def __init__(self, screen_size: tuple, title: str, text: str, asteroids: int, fighters: int, scouts: int, sciences: int, difficulty: int):
         self.screen_size = screen_size
         self.title = title
-        self.text = text
+        self.line_max_length = 35
+        self.text_lines = self.get_lines(text)
+        print(self.text_lines)
+
         self.intro_menu = Menu(
             size =  (2*self.screen_size[0]/3, 2*self.screen_size[1]/3),
-            title_size = 40,
+            title_size = 25,
             parent_surface_dimensions= screen_size,
             colour = '#fbf5ef',
             alpha = 200,
             title = self.title,
-            text = [(self.text, 16)],
+            text = [(line, 16) for line in self.text_lines],
             buttons = [Button(300, 100, "Start")],
             stack = True
         )
+        self.intro_done = False
 
         self.asteroids = asteroids
         self.fighters = fighters
@@ -36,6 +40,27 @@ class Level:
 
         self.spawn_cooldown = difficulty * 2000
         self.time_spawned = 0
+
+    def get_lines(self, text: str) -> list:
+        line_list = []
+        line = ""
+        line_length = 0
+        split = text.split()
+        for word in split:
+            if len(word) + line_length <= self.line_max_length:
+                line += word + " "
+                line_length += len(word)+1
+            else:
+                line_list.append(line)
+                line_length = len(word)+1
+                line = word + " "
+        line_list.append(line)
+                
+        return line_list
+
+
+
+        
 
     def spawn_handler(self):
         current_time = pygame.time.get_ticks()

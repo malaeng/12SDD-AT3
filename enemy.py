@@ -2,30 +2,6 @@ import pygame
 import random
 from laser import Laser
 
-class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, pos):
-        super().__init__()
-        self.asteroid_images = ['graphics/asteroid1.png', 'graphics/asteroid2.png', 'graphics/asteroid3.png']
-        self.image = pygame.image.load(random.choice(self.asteroid_images)).convert_alpha()
-        self.rect = self.image.get_rect(center = pos)
-        self.speed = 2
-        self.health = 200
-
-    def take_damage(self, damage):
-        self.health -= damage
-        self.image = None # if time: make this flash white instead
-        if self.health <= 0:
-            self.kill()
-        self.image = pygame.image.load(random.choice(self.asteroid_images)).convert_alpha()
-
-    def destroy(self):
-        if self.rect.y > 999:
-            self.kill()
-
-    def update(self):
-        self.rect.y += self.speed
-        self.destroy()
-
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, name: str, pos: tuple, screen_height: int, laser_group: pygame.sprite.Group):
         super().__init__()

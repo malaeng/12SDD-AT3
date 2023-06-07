@@ -8,7 +8,7 @@ import pygame, sys, random
  
 from player import Player, Healthbar
 from menu import Menu, Button
-from enemy import Asteroid, Enemy
+from enemy import Enemy
 from level import Level
 
 
@@ -29,18 +29,41 @@ class Game:
         self.enemy_lasers = pygame.sprite.Group()
 
         # Levels
-        self.level1 = Level(
-            screen_size = (screen_width, screen_height),
-            title = "Level 1",
-            text = "Leaving and asteroid field, ... etc.",
-            asteroids = 25,
-            fighters = 0,
-            scouts = 5,
-            sciences = 0,
-            difficulty = 1
-        )
+        self.levels = [
+            Level( # Level 1
+                screen_size = (screen_width, screen_height),
+                title = "Level 1: A New Beginning",
+                text = "What if I write a lot of text and it's really long but not too long just long enough to be a reasonable size for an introduction? It might be even longer than that, this should be fine.",
+                asteroids = 25,
+                fighters = 0,
+                scouts = 5,
+                sciences = 0,
+                difficulty = 1
+            ),
+            Level( # Level 2
+                screen_size = (screen_width, screen_height),
+                title = "Level 2",
+                text = "Leaving and asteroid field, ... etc.",
+                asteroids = 25,
+                fighters = 0,
+                scouts = 5,
+                sciences = 0,
+                difficulty = 1
+            ),
+            Level( # Level 3
+                screen_size = (screen_width, screen_height),
+                title = "Level 3",
+                text = "Leaving and asteroid field, ... etc.",
+                asteroids = 25,
+                fighters = 0,
+                scouts = 5,
+                sciences = 0,
+                difficulty = 1
+            )
 
-        self.level = self.level1
+        ]
+        self.level = self.levels[0]
+        
 
         # Menus
         self.main_menu = Menu(
@@ -51,11 +74,27 @@ class Game:
             alpha = 255, 
             title = "Game Title",
             text = [],
-            buttons = [Button(300, 100, "Play"), 
-                       Button(300, 100, "Options"), 
-                       Button(300, 100, "Quit")],
+            buttons = [Button(300, 75, "Play"), 
+                       Button(300, 75, "Options"),
+                       Button(300, 75, "Level Select"),
+                       Button(300, 75, "Quit")],
             stack = True
-            )        
+            )
+
+        self.level_select_menu = Menu(
+            size = (screen_width, screen_height),
+            title_size = 50,
+            parent_surface_dimensions = (screen_width, screen_height),
+            colour = '#fbf5ef', 
+            alpha = 255, 
+            title = "Level Select",
+            text = [],
+            buttons = [Button(300, 75, "Level 1"), 
+                       Button(300, 75, "Level 2"),
+                       Button(300, 75, "Level 3"),
+                       Button(300, 75, "Back to Menu")],
+            stack = True
+            )     
         
         self.pause_menu = Menu(
             size = (8*screen_width/9, 8*screen_height/9),
@@ -112,7 +151,6 @@ class Game:
     def main_menu_run(self):
         screen.blit(self.main_menu, self.main_menu.rect)
         button_pressed = self.main_menu.process(self.mouse_state)
-        #if self.mouse_state == 'PRESSED':
         if button_pressed == 0: # Run
             self.game_running = True
             self.game_paused = False
@@ -121,8 +159,23 @@ class Game:
             print("options")
             self.current_menu_function = self.options_menu_run
             #self.options_menu_run()
-        elif button_pressed == 2: #Quit
+        elif button_pressed == 2: # Level Select
+            print("level select")
+            self.current_menu_function = self.level_select_menu_run
+        elif button_pressed == 3: #Quit
             self.quit_game()
+
+    def level_select_menu_run(self):
+        screen.blit(self.level_select_menu, self.level_select_menu.rect)
+        button_pressed = self.level_select_menu.process(self.mouse_state)
+        if button_pressed != None:
+            if button_pressed in [i for i in range(len(self.levels))]: # Levels
+                self.game_running = True
+                self.game_paused = False
+                self.level = self.levels[button_pressed]
+                self.run()
+            else: # Return to menu
+                self.current_menu_function = self.main_menu_run
 
     def pause_menu_run(self):
         screen.blit(self.pause_menu, self.pause_menu.rect)
@@ -131,7 +184,7 @@ class Game:
             self.game_paused = False
             self.run()
         elif button_pressed == 1: #Options
-            print("options")
+            print("options_pausemenu")
         elif button_pressed == 2: #Quit 
             self.game_running = False
             self.main_menu_run()
@@ -143,7 +196,7 @@ class Game:
             self.game_paused = False
             self.run()
         elif button_pressed == 1: #Options
-            print("options")
+            print("options_optionsmenu")
         elif button_pressed == 2: #Quit 
             self.game_running = False
             self.current_menu_function = self.main_menu_run
@@ -158,6 +211,14 @@ class Game:
         elif button_pressed == 1:
             # apply upgrade
             self.game_paused = False
+            self.run()
+
+    def level_menu_run(self):
+        screen.blit(self.level.intro_menu, self.level.intro_menu.rect)
+        button_pressed = self.level.intro_menu.process(self.mouse_state)
+        if button_pressed == 0: # Start
+            self.game_paused = False
+            self.level.intro_done = True
             self.run()
 
     def collision_checks(self):
@@ -178,6 +239,16 @@ class Game:
                     if self.player.sprite.health <= 0:
                         print('game over')
 
+    def level_manager(self):
+        self.level.update()
+        if len(self.level.all_enemies) == 0 and len(self.level.current_enemies) == 0:
+            current_level = self.levels.index(self.level)
+            if current_level == len(self.levels):
+                print('game over')
+            else:
+                self.level = self.levels[current_level+1]
+            
+
     def quit_game(self):
         pygame.quit()
         quit()
@@ -189,6 +260,8 @@ class Game:
             self.player.sprite.lasers.draw(screen)
             self.player.draw(screen)
             self.pause_menu_run()
+        elif not self.level.intro_done:
+            self.level_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
             screen.blit(self.player_healthbar, self.player_healthbar_rect)
@@ -205,7 +278,8 @@ class Game:
             self.player_healthbar.process((self.player.sprite.health/self.player.sprite.max_health))
             # self.player_healthbar.blit(self.player_healthbar.percent_image, self.player_healthbar.percent_rect)
 
-            self.level.update()
+            self.level_manager()
+
             #self.level.enemy_lasers.update()
             self.level.current_enemies.draw(screen)
             self.level.enemy_lasers.draw(screen)
