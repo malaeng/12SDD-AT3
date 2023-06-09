@@ -6,20 +6,34 @@
 
 import pygame, sys, random
  
-from player import Player, Healthbar
+from player import Player
+from ui import UI
 from menu import Menu, Button
 from enemy import Enemy
 from level import Level
 
+class Star(pygame.sprite.Sprite):
+    def __init__(self, pos: tuple, screen_height: int):
+        super().__init__()
+        self.screen_height = screen_height
+        self.image = pygame.image.load('graphics/star.png').convert_alpha()
+        self.rect = self.image.get_rect(center = pos)
+        self.image.set_alpha(random.randint(200, 255))
+
+    def update(self):
+        self.rect.y += 10
+        if self.rect.y > self.screen_height:
+            self.kill()
 
 class Game:
     def __init__(self):
         # Player setup
-        player_sprite = Player((screen_width / 2, screen_height - screen_height/ 8), screen_width)
+        player_sprite = Player((screen_width / 2, screen_height - screen_height/ 6), screen_width)
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
-        self.player_healthbar = Healthbar((screen_width / 5, 14*screen_height/15), (300, 30), 1)
-        self.player_healthbar_rect = self.player_healthbar.get_rect(center = (screen_width / 5, 14*screen_height/15))
+        # UI
+        self.ui = UI((screen_width, screen_height/8))
+        self.ui_rect = self.ui.get_rect(midtop = (screen_width/2, 7*screen_height/8))
 
         # Enemies
         self.enemies = pygame.sprite.Group()
@@ -28,12 +42,15 @@ class Game:
 
         self.enemy_lasers = pygame.sprite.Group()
 
+        # Stars
+        self.stars = pygame.sprite.Group()
+
         # Levels
         self.levels = [
             Level( # Level 1
                 screen_size = (screen_width, screen_height),
-                title = "Level 1: A New Beginning",
-                text = "What if I write a lot of text and it's really long but not too long just long enough to be a reasonable size for an introduction? It might be even longer than that, this should be fine.",
+                title = "Level 1",
+                text = "You comandeer a small rebel vessel tasked with delivering secret plans to the rebel base located on the other side of the sector. This asteroid field may allow you to stay undetected, but watch out for rebel scouts",
                 asteroids = 25,
                 fighters = 0,
                 scouts = 5,
@@ -44,27 +61,26 @@ class Game:
                 screen_size = (screen_width, screen_height),
                 title = "Level 2",
                 text = "Leaving and asteroid field, ... etc.",
-                asteroids = 25,
-                fighters = 0,
+                asteroids = 5,
+                fighters = 15,
                 scouts = 5,
-                sciences = 0,
+                sciences = 2,
                 difficulty = 1
             ),
             Level( # Level 3
                 screen_size = (screen_width, screen_height),
                 title = "Level 3",
                 text = "Leaving and asteroid field, ... etc.",
-                asteroids = 25,
-                fighters = 0,
-                scouts = 5,
-                sciences = 0,
-                difficulty = 1
+                asteroids = 0,
+                fighters = 5,
+                scouts = 10,
+                sciences = 10,
+                difficulty = 3
             )
-
         ]
         self.level = self.levels[0]
-        
 
+        
         # Menus
         self.main_menu = Menu(
             size = (screen_width, screen_height),
@@ -107,6 +123,18 @@ class Game:
             buttons = [Button(300, 100, "Continue"),
                        Button(300, 100, "Options"),
                        Button(300, 100, "Quit to Menu")],
+            stack = True
+            )
+        
+        self.game_over_menu = Menu(
+            size = (8*screen_width/9, 8*screen_height/9),
+            title_size = 50,
+            parent_surface_dimensions = (screen_width, screen_height),
+            colour = '#fbf5ef', 
+            alpha = 200, 
+            title = "Game Over",
+            text = [("You win!", 20) if self.player.sprite.health >= 0 else ("You Lose", 20)],
+            buttons = [Button(300, 100, "Return to Menu")],
             stack = True
             )
         
@@ -201,6 +229,13 @@ class Game:
             self.game_running = False
             self.current_menu_function = self.main_menu_run
 
+    def game_over_menu_run(self):
+        screen.blit(self.game_over_menu, self.game_over_menu.rect)
+        button_pressed = self.game_over_menu.process(self.mouse_state)
+        if button_pressed == 0: # Return to menu
+            self.game_running = False
+            self.current_menu_function = self.main_menu_run
+
     def upgrade_menu_run(self):
         screen.blit(self.upgrade_menu, self.upgrade_menu.rect)
         button_pressed = self.upgrade_menu.process(self.mouse_state)
@@ -230,14 +265,24 @@ class Game:
                     for enemy in enemies_hit:
                         enemy.take_damage(self.player.sprite.damage)
                     laser.kill()
+
         if self.level.enemy_lasers:
             for laser in self.level.enemy_lasers:
                 if pygame.sprite.spritecollide(laser, self.player, False):
                     laser.kill()
                     print('player hit')
                     self.player.sprite.health -= 50
-                    if self.player.sprite.health <= 0:
-                        print('game over')
+
+        
+        if self.level.current_enemies:
+            for enemy in self.level.current_enemies:
+                if pygame.sprite.spritecollide(enemy, self.player, False):
+                    enemy.kill()
+                    self.player.sprite.health -= 150
+
+        if self.player.sprite.health <= 0:
+            print('game over')
+                    
 
     def level_manager(self):
         self.level.update()
@@ -264,18 +309,18 @@ class Game:
             self.level_menu_run()
         else:
             self.player.sprite.lasers.draw(screen)
-            screen.blit(self.player_healthbar, self.player_healthbar_rect)
-            # for enemy in self.enemies:
-            #     enemy.lasers.draw(screen)
+
+
+
+
             
             self.player.update()
             self.player.draw(screen)
             
             
             self.collision_checks()
-            
-            
-            self.player_healthbar.process((self.player.sprite.health/self.player.sprite.max_health))
+
+
             # self.player_healthbar.blit(self.player_healthbar.percent_image, self.player_healthbar.percent_rect)
 
             self.level_manager()
@@ -283,6 +328,12 @@ class Game:
             #self.level.enemy_lasers.update()
             self.level.current_enemies.draw(screen)
             self.level.enemy_lasers.draw(screen)
+
+            # UI
+            screen.blit(self.ui, self.ui_rect)
+            self.ui.update()
+            self.ui.player_healthbar.update(self.player.sprite.health/self.player.sprite.max_health)
+            self.ui.level_progress.update(1-len(self.level.all_enemies)/self.level.total_num_enemies)
             
            
 if __name__ == '__main__':

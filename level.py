@@ -29,11 +29,13 @@ class Level:
         self.sciences = sciences
 
         self.all_enemies = []
+        
         for i in range(self.asteroids): self.all_enemies.append('asteroid')
         for i in range(self.fighters): self.all_enemies.append('fighter')
         for i in range(self.scouts): self.all_enemies.append('scout')
         for i in range(self.sciences): self.all_enemies.append('science')
         random.shuffle(self.all_enemies)
+        self.total_num_enemies = len(self.all_enemies)
 
         self.current_enemies = pygame.sprite.Group()
         self.enemy_lasers = pygame.sprite.Group()

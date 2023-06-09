@@ -6,29 +6,54 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, name: str, pos: tuple, screen_height: int, laser_group: pygame.sprite.Group):
         super().__init__()
 
-        self.asteroid_images = ['graphics/asteroid1.png', 'graphics/asteroid2.png', 'graphics/asteroid3.png']
-        # All avaliable enemy types
+        # Flags and general variables
+        self.screen_height = screen_height
+        self.chosen_position = False
+        self.move_position = 0
+
+        # Enemy type
         self.enemy_data = {
-            'asteroid': {'health': 300, 'speed': 3, 'attack_type': None, 'cooldown': None, 'attack_sound': None, 'image': random.choice(self.asteroid_images)},
-            'fighter': {'health': 100, 'speed': 5, 'attack_type': 'basic', 'cooldown': (800, 1200), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_fighter.png'},
-            'scout': {'health': 80, 'speed': 10, 'attack_type': 'basic', 'cooldown': (700, 1500), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_scout.png'},
-            'science': {'health': 60, 'speed': 6, 'attack_type': 'spread', 'cooldown': (1600, 2000), 'attack_sound': 'audio/laserSmall_001.ogg', 'image': 'graphics/enemy_science.png'}
+            'asteroid': {
+                'health': 300, 
+                'speed': 3, 
+                'attack_type': None, 
+                'cooldown': None, 
+                'attack_sound': None, 
+                'image': random.choice(['graphics/asteroid1.png', 'graphics/asteroid2.png', 'graphics/asteroid3.png'])},
+            'fighter': {
+                'health': 100, 
+                'speed': 5, 
+                'attack_type': 'basic', 
+                'cooldown': (800, 1200), 
+                'attack_sound': 'audio/laserSmall_001.ogg', 
+                'image': 'graphics/enemy_fighter.png'},
+            'scout': {
+                'health': 80, 
+                'speed': 10, 
+                'attack_type': 'basic', 
+                'cooldown': (700, 1500), 
+                'attack_sound': 'audio/laserSmall_001.ogg', 
+                'image': 'graphics/enemy_scout.png'},
+            'science': {
+                'health': 60, 
+                'speed': 6, 
+                'attack_type': 'spread', 
+                'cooldown': (1600, 2000), 
+                'attack_sound': 'audio/laserSmall_001.ogg', 
+                'image': 'graphics/enemy_science.png'}
         }
         self.type = self.enemy_data[name]
+
+        # Health
+        self.health = self.type['health']
+        self.max_health = self.health
 
         # Graphics
         self.image = pygame.image.load(self.type['image']).convert_alpha()
         self.rect = self.image.get_rect(center = pos)
 
-        
-        self.health = self.type['health']
-        self.max_health = self.health
-        self.screen_height = screen_height
-        self.chosen_position = False
-        self.move_position = 0
-
         # Lasers
-        # self.lasers = pygame.sprite.Group()
+        # All enemy lasers are stored in a single sprite group in the game class
         self.game_laser_group = laser_group
         self.time_shot = 0
 
@@ -46,11 +71,17 @@ class Enemy(pygame.sprite.Sprite):
             if self.rect.x > self.move_position: self.rect.x -= 1
             elif self.rect.x < self.move_position: self.rect.x += 1
             elif self.rect.x == self.move_position: self.chosen_position = False
+
+        # Always move downwards.
         self.rect.y += 1
+
+        # If it has gone offscreen, kill it
         if self.rect.y >= self.screen_height:
             self.kill()
 
     def take_damage(self, damage: int):
+        # Takes damage away from health, and sets the alpha (transperency) to the percent of it's max health.
+        # If it has no health, kill it.
         self.health -= damage
         self.image.set_alpha(255*self.health/self.max_health)
         if self.health <= 0: self.kill()
@@ -75,7 +106,5 @@ class Enemy(pygame.sprite.Sprite):
             if current_time - self.time_shot >= random.randint(self.type['cooldown'][0], self.type['cooldown'][1]):
                 self.shoot()
         self.move()
-        #self.shoot()
-        #self.lasers.update()
 
 
