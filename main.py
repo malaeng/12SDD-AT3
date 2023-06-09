@@ -18,12 +18,14 @@ class Star(pygame.sprite.Sprite):
         self.screen_height = screen_height
         self.image = pygame.image.load('graphics/star.png').convert_alpha()
         self.rect = self.image.get_rect(center = pos)
-        self.image.set_alpha(random.randint(200, 255))
+        self.image.set_alpha(random.randint(150, 200))
+        self.speed = 1
 
     def update(self):
-        self.rect.y += 10
+        self.rect.y += self.speed
         if self.rect.y > self.screen_height:
-            self.kill()
+            rand_x = random.randint(0, screen_width)
+            self.rect = self.image.get_rect(center = (rand_x, 0))
 
 class Game:
     def __init__(self):
@@ -44,6 +46,10 @@ class Game:
 
         # Stars
         self.stars = pygame.sprite.Group()
+        for i in range(30):
+            rand_x = random.randint(0, screen_width)
+            rand_y = random.randint(0, screen_height)
+            self.stars.add(Star((rand_x, rand_y), screen_height))
 
         # Levels
         self.levels = [
@@ -133,7 +139,7 @@ class Game:
             colour = '#fbf5ef', 
             alpha = 200, 
             title = "Game Over",
-            text = [("You win!", 20) if self.player.sprite.health >= 0 else ("You Lose", 20)],
+            text = [("You win!", 20) if self.player.sprite.health <= 0 else ("You Lose", 20)],
             buttons = [Button(300, 100, "Return to Menu")],
             stack = True
             )
@@ -175,6 +181,7 @@ class Game:
         self.game_running = False
         self.game_paused = True
         self.mouse_state = 'PASSIVE'
+        self.game_end = False
 
     def main_menu_run(self):
         screen.blit(self.main_menu, self.main_menu.rect)
@@ -182,11 +189,11 @@ class Game:
         if button_pressed == 0: # Run
             self.game_running = True
             self.game_paused = False
-            self.run()
+            self.current_menu_function = self.pause_menu_run
+            #self.run()
         elif button_pressed == 1: #Options
             print("options")
             self.current_menu_function = self.options_menu_run
-            #self.options_menu_run()
         elif button_pressed == 2: # Level Select
             print("level select")
             self.current_menu_function = self.level_select_menu_run
@@ -212,15 +219,15 @@ class Game:
             self.game_paused = False
             self.run()
         elif button_pressed == 1: #Options
-            print("options_pausemenu")
+            self.current_menu_function = self.options_menu_run
         elif button_pressed == 2: #Quit 
             self.game_running = False
-            self.main_menu_run()
+            self.current_menu_function = self.main_menu_run
 
     def options_menu_run(self):
         screen.blit(self.options_menu, self.options_menu.rect)
         button_pressed = self.options_menu.process(self.mouse_state)
-        if button_pressed == 0: # Continue
+        if button_pressed == 0: # 
             self.game_paused = False
             self.run()
         elif button_pressed == 1: #Options
@@ -234,6 +241,7 @@ class Game:
         button_pressed = self.game_over_menu.process(self.mouse_state)
         if button_pressed == 0: # Return to menu
             self.game_running = False
+            self.game_end = True
             self.current_menu_function = self.main_menu_run
 
     def upgrade_menu_run(self):
@@ -282,6 +290,8 @@ class Game:
 
         if self.player.sprite.health <= 0:
             print('game over')
+            self.game_running = False
+            self.current_menu_function = self.game_over_menu_run
                     
 
     def level_manager(self):
@@ -290,6 +300,8 @@ class Game:
             current_level = self.levels.index(self.level)
             if current_level == len(self.levels):
                 print('game over')
+                self.game_running = False
+                self.current_menu_function = self.game_over_menu_run
             else:
                 self.level = self.levels[current_level+1]
             
@@ -304,24 +316,21 @@ class Game:
         elif self.game_paused == True:
             self.player.sprite.lasers.draw(screen)
             self.player.draw(screen)
-            self.pause_menu_run()
+            self.current_menu_function()
         elif not self.level.intro_done:
             self.level_menu_run()
         else:
+            # stars
+
+            self.stars.draw(screen)
+            self.stars.update()
             self.player.sprite.lasers.draw(screen)
 
-
-
-
-            
             self.player.update()
             self.player.draw(screen)
             
             
             self.collision_checks()
-
-
-            # self.player_healthbar.blit(self.player_healthbar.percent_image, self.player_healthbar.percent_rect)
 
             self.level_manager()
 
@@ -366,5 +375,6 @@ if __name__ == '__main__':
 
         screen.fill("#272744")
         game.run()
+        if game.game_end: game = Game()
         pygame.display.flip()
         clock.tick(60)
