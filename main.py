@@ -42,8 +42,6 @@ class Game:
         # Fonts
         self.font = pygame.font.Font('graphics/pixeled.ttf', 20)
 
-        # Enemy lasers
-        self.enemy_lasers = pygame.sprite.Group()
 
         # Stars
         self.stars = pygame.sprite.Group()
@@ -53,7 +51,7 @@ class Game:
         for i in range(self.num_stars):
             rand_x = random.randint(0, screen_width)
             rand_y = random.randint(0, screen_height)
-            self.stars.add(Star((rand_x, rand_y), screen_height))
+            self.stars.add(Star((rand_x, rand_y), screen_height, screen_width))
 
         # Levels
         self.levels = [
@@ -100,7 +98,7 @@ class Game:
             parent_surface_dimensions = (screen_width, screen_height),
             colour = '#fbf5ef', 
             alpha = 255, 
-            title = "Game Title",
+            title = "Celestial Smuggler",
             text = [],
             buttons = [Button(300, 75, "Play"), 
                        Button(300, 75, "Options/Help"),
@@ -439,7 +437,7 @@ if __name__ == '__main__':
     screen_width = 960
     screen_height = 720
     screen = pygame.display.set_mode((screen_width, screen_height))
-    pygame.display.set_caption("Space game [to be renamed]")
+    pygame.display.set_caption("Celestial Smuggler")
 
     # other variables
     clock = pygame.time.Clock()

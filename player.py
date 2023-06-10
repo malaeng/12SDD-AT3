@@ -5,8 +5,18 @@ import random
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos: tuple, constraint: int):
         super().__init__()
+        # Graphics
         self.image = pygame.image.load('graphics/player.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = pos)
+
+        # Lasers
+        self.lasers = pygame.sprite.Group()
+
+        # Audio
+        self.laser_SFX = pygame.mixer.Sound('audio/laserSmall_002.ogg')
+        self.laser_SFX.set_volume(0.3)
+
+        # Other variables
         self.speed = 8
         self.damage = 30
         self.health = 600
@@ -17,14 +27,6 @@ class Player(pygame.sprite.Sprite):
         self.time_shot = 0
         self.cooldown = 150
 
-        self.lasers = pygame.sprite.Group()
-
-
-
-        # Audio
-        self.laser_SFX = pygame.mixer.Sound('audio/laserSmall_002.ogg')
-        self.laser_SFX.set_volume(0.3)
-
     def get_input(self):
         # Instead of checking for key_down and key_up as in the tutorial, stores all keys as a true or false value, for if they are being pressed or not.
         # To react to input, a pre-test loop checks if the value of a certain key is true - if it is being pressed
@@ -34,15 +36,18 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_RIGHT]:
             self.rect.x += self.speed
             self.image = pygame.image.load('graphics/player_right.png').convert_alpha()
+
         elif keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
             self.image = pygame.image.load('graphics/player_left.png').convert_alpha()
+
         else:
             self.image = pygame.image.load('graphics/player.png').convert_alpha()
 
         if keys[pygame.K_SPACE] and self.charged:
             self.shoot()
             self.charged = False
+            # Saves the time that the laser was shot
             self.time_shot = pygame.time.get_ticks()
 
     def shoot(self):
@@ -51,11 +56,14 @@ class Player(pygame.sprite.Sprite):
 
     def recharge(self):
         if not self.charged:
+            # Checks if enough time has passed since the player has last shot.
+            # If so, sets charged to true.
             current_time = pygame.time.get_ticks()
             if current_time - self.time_shot >= self.cooldown:
                 self.charged = True
 
     def constraint(self):
+        # Ensures player can not go beyond the bounds of the screen
         if self.rect.left <= 0:
             self.rect.left = 0
         if self.rect.right >= self.max_x_constraint:
@@ -64,8 +72,6 @@ class Player(pygame.sprite.Sprite):
     def take_damage(self, damage):
         self.health -= damage
         self.image.set_alpha(200)
-        if self.health <= 0: 
-            pass
 
     def update(self):
         self.get_input()

@@ -11,7 +11,7 @@ class Enemy(pygame.sprite.Sprite):
         self.chosen_position = False
         self.move_position = 0
 
-        # Enemy type
+        # Enemy type (on initiation, will be set to only one of these)
         self.enemy_data = {
             'asteroid': {
                 'health': 300, 
@@ -67,13 +67,16 @@ class Enemy(pygame.sprite.Sprite):
 
     
     def move(self):
+        # Pick a random x-value.
         if not self.chosen_position: 
             self.move_position = random.randint(20, self.screen_height-20)
             self.chosen_position = True
+        # If one has already been chose, move towards it slowly.
         else:
             if self.rect.x > self.move_position: self.rect.x -= 1
             elif self.rect.x < self.move_position: self.rect.x += 1
-            elif self.rect.x == self.move_position: self.chosen_position = False
+            # Once it reaches the x-value, pick a new one
+            elif self.rect.x == self.move_position: self.chosen_position = False 
 
         # Always move downwards.
         self.rect.y += 1
@@ -92,14 +95,20 @@ class Enemy(pygame.sprite.Sprite):
             if SFX_on: pygame.mixer.Sound.play(self.explode_SFX)
 
     def shoot(self, SFX_on: bool):
+        # Saves the time that the enemy shot
         self.time_shot = pygame.time.get_ticks()
+
+
         attack_type = self.type['attack_type']
         if attack_type == 'basic':
+            # Shoots a single laser that moves very fast
             if SFX_on: pygame.mixer.Sound.play(self.attack_SFX)
             self.game_laser_group.add(Laser(self.rect.center, (0, 16), self.screen_height))
         elif attack_type == 'burst':
+            # Not implemented, due to time constraints
             pass
         elif attack_type == 'spread':
+            # Shoots 3 slower lasers that spread out
             if SFX_on: pygame.mixer.Sound.play(self.attack_SFX)
             self.game_laser_group.add(Laser(self.rect.center, (0, 12), self.screen_height))
             self.game_laser_group.add(Laser(self.rect.center, (-8, 6), self.screen_height))
@@ -108,6 +117,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self, SFX_on):
         current_time = pygame.time.get_ticks()
         if self.type['cooldown']:
+            # Checks that time passed between last shot is greater than a random cooldown value for the enemy class
             if current_time - self.time_shot >= random.randint(self.type['cooldown'][0], self.type['cooldown'][1]):
                 self.shoot(SFX_on)
         self.move()

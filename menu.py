@@ -93,6 +93,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
     def __init__(self, size: tuple, title_size: int, parent_surface_dimensions: tuple, colour: str, alpha: int, title: str, text: list, buttons: list, stack: bool):
         super().__init__(size)
 
+        # Layout
         self.stack = stack
 
         # Color
@@ -108,7 +109,6 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         self.element_centers = [(i * (self.height/self.total_elements)) for i in range(self.total_elements)]
         self.current_center = 1
 
-
         # Title
         self.title_font = pygame.font.Font('graphics/PressStart2P.ttf', title_size)
         self.title = title
@@ -121,46 +121,52 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
             self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
             self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
             
+        # Buttons
         self.buttons = buttons
 
         
 
     def update(self, mouse_state: str, SFX_on: bool, ) -> int:
 
-        self.text_surfs = []
-        for i in self.text_elements:
-            self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
-            self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
-
+        # Tracker for element placing
         self.current_center = 2
+
+
         # Title
         title_surf = self.title_font.render(self.title, False, 'black')
         title_rect = title_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
         self.current_center += 2
         self.blit(title_surf, title_rect)
 
-
-
         # Text
         if self.text_surfs:
             for text_surf in self.text_surfs:
                 index = self.text_surfs.index(text_surf)
+
                 text_rect = text_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
+
+                # If text element is a title located before buttons, add more space underneath it
                 if self.text_elements[index][1] >= 16 and index+1 == len(self.text_surfs): self.current_center += 3
                 else: self.current_center += 1
+                
                 self.blit(text_surf, text_rect)
         
         # Buttons
         for button in self.buttons:
             index = self.buttons.index(button)
+
+            # Stack all buttons on top of each other
             if self.stack:
                 button_rect = button.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
                 button_border_rect = button.border_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
                 self.current_center += 2
+
+            # Put all buttons next to each other (disfunctional and not used, due to time constraints)
             elif not self.stack:
                 button_rect = button.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
                 button_border_rect = button.border_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
                 self.current_center += 2
+
             # Returns the index of the button if it has been pressed and released
             if button.get_input(button_rect, self, mouse_state, SFX_on): return index
 

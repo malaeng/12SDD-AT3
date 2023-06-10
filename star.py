@@ -1,7 +1,7 @@
 import pygame, random
 
 class Star(pygame.sprite.Sprite):
-    def __init__(self, pos: tuple, screen_height: int):
+    def __init__(self, pos: tuple, screen_height: int, screen_width: int):
         super().__init__()
 
         # Graphics
@@ -12,6 +12,7 @@ class Star(pygame.sprite.Sprite):
         # Other variables
         self.speed = 1
         self.screen_height = screen_height
+        self.screen_width = screen_width
 
     def update(self):
         # Moves down at a constant rate. 
@@ -19,5 +20,5 @@ class Star(pygame.sprite.Sprite):
 
         # If the star goes below the screen height, move it back to the top with a new random x-value
         if self.rect.y > self.screen_height:
-            rand_x = random.randint(0, screen_width)
+            rand_x = random.randint(0, self.screen_width)
             self.rect = self.image.get_rect(center = (rand_x, 0))
