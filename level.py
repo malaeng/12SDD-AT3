@@ -8,7 +8,6 @@ class Level:
         self.title = title
         self.line_max_length = 35
         self.text_lines = self.get_lines(text)
-        print(self.text_lines)
 
         self.intro_menu = Menu(
             size =  (2*self.screen_size[0]/3, 2*self.screen_size[1]/3),
@@ -60,23 +59,19 @@ class Level:
                 
         return line_list
 
-
-
-        
-
-    def spawn_handler(self):
+    def spawn_handler(self, SFX_on):
         current_time = pygame.time.get_ticks()
         if current_time - self.time_spawned >= self.spawn_cooldown and len(self.all_enemies) > 0:
             self.spawn_enemy(self.all_enemies[0])
             self.all_enemies.pop(0)
-        self.current_enemies.update()
+        self.current_enemies.update(SFX_on)
 
     def spawn_enemy(self, enemy_class):
         self.time_spawned = pygame.time.get_ticks()
         spawn_x = random.randint(0, self.screen_size[0])
         self.current_enemies.add(Enemy(enemy_class, (spawn_x, -20), self.screen_size[1], self.enemy_lasers))
 
-    def update(self):
-        self.spawn_handler()
+    def update(self, SFX_on):
+        self.spawn_handler(SFX_on)
         self.enemy_lasers.update()
-        self.current_enemies.update()
+        self.current_enemies.update(SFX_on)

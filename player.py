@@ -8,8 +8,8 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load('graphics/player.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = pos)
         self.speed = 8
-        self.damage = 20
-        self.health = 500
+        self.damage = 30
+        self.health = 600
         self.max_health = self.health
         self.max_x_constraint = constraint
 
@@ -22,12 +22,8 @@ class Player(pygame.sprite.Sprite):
 
 
         # Audio
-        self.laser_SFX_01 = pygame.mixer.Sound('audio/laserSmall_001.ogg')
-        self.laser_SFX_02 = pygame.mixer.Sound('audio/laserSmall_002.ogg')
-        self.laser_SFX_03 = pygame.mixer.Sound('audio/laserSmall_003.ogg')
-        self.laser_SFX_04 = pygame.mixer.Sound('audio/laserSmall_004.ogg')
-
-        self.laser_SFX_02.set_volume(0.3)
+        self.laser_SFX = pygame.mixer.Sound('audio/laserSmall_002.ogg')
+        self.laser_SFX.set_volume(0.3)
 
     def get_input(self):
         # Instead of checking for key_down and key_up as in the tutorial, stores all keys as a true or false value, for if they are being pressed or not.
@@ -50,7 +46,7 @@ class Player(pygame.sprite.Sprite):
             self.time_shot = pygame.time.get_ticks()
 
     def shoot(self):
-        pygame.mixer.Sound.play(self.laser_SFX_02)
+        pygame.mixer.Sound.play(self.laser_SFX)
         self.lasers.add(Laser(self.rect.center, (0, -16), self.rect.bottom))
 
     def recharge(self):
@@ -77,15 +73,4 @@ class Player(pygame.sprite.Sprite):
         self.recharge()
         self.lasers.update()
         
-
-
-
-
-
-
-
-
-
-
-
 

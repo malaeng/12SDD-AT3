@@ -44,7 +44,7 @@ class Button(pygame.Surface):
         self.hover_SFX = pygame.mixer.Sound('audio/glass_006.ogg')
         self.hover_SFX.set_volume(0.1)
 
-    def get_input(self, button_rect: pygame.rect, surface: pygame.surface, mouse_state: str):
+    def get_input(self, button_rect: pygame.rect, surface: pygame.surface, mouse_state: str, SFX_on: bool) -> bool:
         mouse_pos = pygame.mouse.get_pos()
         # The button's x and y coordinates are relative to the parent surface. 
         # However, the mouse_pos is not, so the x and y values of the parent surface are added to ensure it lines up correctly with the mouse_pos
@@ -59,16 +59,18 @@ class Button(pygame.Surface):
         # Flags ensure some actions only occur once (e.g. playing sound)
         if real_rect.collidepoint(mouse_pos): # If the mouse is over the button
             self.fill(self.colours['hover'])
-            if not self.already_hovered: pygame.mixer.Sound.play(self.hover_SFX)
+            if not self.already_hovered: 
+                if SFX_on: pygame.mixer.Sound.play(self.hover_SFX)
             self.already_hovered = True
 
             if mouse_state == 'PRESSED': # If the button has been pressed
-                if not self.already_pressed: pygame.mixer.Sound.play(self.click_down_SFX)
+                if not self.already_pressed: 
+                    if SFX_on: pygame.mixer.Sound.play(self.click_down_SFX)
                 self.fill(self.colours['pressed'])
                 self.already_pressed = True
             
             if mouse_state == 'RELEASED' and self.already_pressed: # If the button has been released
-                pygame.mixer.Sound.play(self.click_up_SFX)
+                if SFX_on: pygame.mixer.Sound.play(self.click_up_SFX)
                 self.already_pressed = False
                 if self.is_toggle: 
                     if self.toggled: 
@@ -119,19 +121,17 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
             self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
             self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
             
-
-        # Buttons
-        # self.button_titles = buttons
-        # if self.stack:
-        #     self.buttons = [Button(300, 100, self.button_titles[i]) for i in range(len(self.button_titles))]
-        # elif not self.stack:
-        #     self.buttons = [Button(200, 200, self.button_titles[i]) for i in range(len(self.button_titles))]
-
         self.buttons = buttons
 
         
 
-    def process(self, mouse_state: str) -> int:
+    def update(self, mouse_state: str, SFX_on: bool, ) -> int:
+
+        self.text_surfs = []
+        for i in self.text_elements:
+            self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
+            self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
+
         self.current_center = 2
         # Title
         title_surf = self.title_font.render(self.title, False, 'black')
@@ -162,7 +162,7 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
                 button_border_rect = button.border_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
                 self.current_center += 2
             # Returns the index of the button if it has been pressed and released
-            if button.get_input(button_rect, self, mouse_state): return index
+            if button.get_input(button_rect, self, mouse_state, SFX_on): return index
 
             # Draw buttons
             button.draw_text()

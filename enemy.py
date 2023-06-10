@@ -60,7 +60,10 @@ class Enemy(pygame.sprite.Sprite):
         # Audio
         if self.type['attack_sound']:
             self.attack_SFX = pygame.mixer.Sound(self.type['attack_sound'])
-            self.attack_SFX.set_volume(0.05)
+            self.attack_SFX.set_volume(0.5)
+
+        self.explode_SFX = pygame.mixer.Sound('audio/explosionCrunch_000.ogg')
+        self.explode_SFX.set_volume(0.6)
 
     
     def move(self):
@@ -79,32 +82,34 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.y >= self.screen_height:
             self.kill()
 
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: int, SFX_on: bool):
         # Takes damage away from health, and sets the alpha (transperency) to the percent of it's max health.
         # If it has no health, kill it.
         self.health -= damage
         self.image.set_alpha(255*self.health/self.max_health)
-        if self.health <= 0: self.kill()
+        if self.health <= 0: 
+            self.kill()
+            if SFX_on: pygame.mixer.Sound.play(self.explode_SFX)
 
-    def shoot(self):
+    def shoot(self, SFX_on: bool):
         self.time_shot = pygame.time.get_ticks()
         attack_type = self.type['attack_type']
         if attack_type == 'basic':
-            pygame.mixer.Sound.play(self.attack_SFX)
+            if SFX_on: pygame.mixer.Sound.play(self.attack_SFX)
             self.game_laser_group.add(Laser(self.rect.center, (0, 16), self.screen_height))
         elif attack_type == 'burst':
             pass
         elif attack_type == 'spread':
-            pygame.mixer.Sound.play(self.attack_SFX)
+            if SFX_on: pygame.mixer.Sound.play(self.attack_SFX)
             self.game_laser_group.add(Laser(self.rect.center, (0, 12), self.screen_height))
             self.game_laser_group.add(Laser(self.rect.center, (-8, 6), self.screen_height))
             self.game_laser_group.add(Laser(self.rect.center, (8, 6), self.screen_height))
 
-    def update(self):
+    def update(self, SFX_on):
         current_time = pygame.time.get_ticks()
         if self.type['cooldown']:
             if current_time - self.time_shot >= random.randint(self.type['cooldown'][0], self.type['cooldown'][1]):
-                self.shoot()
+                self.shoot(SFX_on)
         self.move()
 
 
