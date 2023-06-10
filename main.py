@@ -229,6 +229,7 @@ class Game:
         elif button_pressed == 2: # Return to menu
             self.game_paused = False
             self.game_running = False
+            self.game_end = True
             self.change_music('MENU')
             self.current_menu_function = self.main_menu_run
 
