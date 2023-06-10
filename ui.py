@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Contains the UI class
+
 import pygame
 
 class UI(pygame.Surface):

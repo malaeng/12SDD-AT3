@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Tutorial project, for reference (not used in the final solution)
+
 import pygame
 import time
 import random

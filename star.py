@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Contains the star class
+
 import pygame, random
 
 class Star(pygame.sprite.Sprite):

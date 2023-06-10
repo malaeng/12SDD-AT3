@@ -1,8 +1,5 @@
-# https://lospec.com/palette-list/oil-6
-# https://www.dafont.com/press-start-2p.font
-# https://www.kenney.nl/assets/sci-fi-sounds 
-# https://www.kenney.nl/assets/interface-sounds
-
+# Created by Malachi English, 12/6/2023
+# Pygame top-down scaceship shoot-em-up.
 
 import pygame, sys, random
  

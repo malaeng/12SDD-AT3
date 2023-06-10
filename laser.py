@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Contains the laser class
+
 import pygame
 
 class Laser(pygame.sprite.Sprite):

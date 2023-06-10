@@ -1,6 +1,8 @@
+# Created by Malachi English, 12/6/2023
+# Contains the player class
+
 import pygame
 from laser import Laser
-import random
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos: tuple, constraint: int):

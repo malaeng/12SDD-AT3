@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Contains the enemy class
+
 import pygame
 import random
 from laser import Laser

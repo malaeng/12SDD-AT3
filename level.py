@@ -1,3 +1,6 @@
+# Created by Malachi English, 12/6/2023
+# Contains the level class
+
 import pygame, random
 from menu import Menu, Button
 from enemy import Enemy
