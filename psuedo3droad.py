@@ -1,5 +1,5 @@
 # Created by Malachi English, 12/6/2023
-# Tutorial project, for reference (not used in the final solution)
+# Testing psuedo 3D roads. Ended up scrapping this idea.
 
 import pygame
 import time

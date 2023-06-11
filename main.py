@@ -9,8 +9,6 @@ from menu import Menu, Button
 from level import Level
 from star import Star
 
-
-
 class Game:
     def __init__(self):
 

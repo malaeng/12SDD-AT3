@@ -118,11 +118,6 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
 
         # Text
         self.text_elements = text
-        
-        self.text_surfs = []
-        for i in self.text_elements:
-            self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
-            self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
             
         # Buttons
         self.buttons = buttons
@@ -140,6 +135,13 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         title_rect = title_surf.get_rect(center = (self.width/2, self.element_centers[self.current_center]))
         self.current_center += 2
         self.blit(title_surf, title_rect)
+
+        
+        
+        self.text_surfs = []
+        for i in self.text_elements:
+            self.text_font = pygame.font.Font('graphics/PressStart2P.ttf', i[1])
+            self.text_surfs.append(self.text_font.render(i[0], False, 'black'))
 
         # Text
         if self.text_surfs:
