@@ -6,11 +6,12 @@ import random
 from laser import Laser
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, name: str, pos: tuple, screen_height: int, laser_group: pygame.sprite.Group):
+    def __init__(self, name: str, pos: tuple, screen_height: int, screen_width: int, laser_group: pygame.sprite.Group):
         super().__init__()
 
         # Flags and general variables
         self.screen_height = screen_height
+        self.screen_width = screen_width
         self.chosen_position = False
         self.move_position = 0
 
@@ -70,9 +71,9 @@ class Enemy(pygame.sprite.Sprite):
 
     
     def move(self):
-        # Pick a random x-value.
+        # Pick a random x-value that goes 50 pixels beyond the bounds of the screen.
         if not self.chosen_position: 
-            self.move_position = random.randint(20, self.screen_height-20)
+            self.move_position = random.randint(-50, self.screen_width+50)
             self.chosen_position = True
         # If one has already been chose, move towards it slowly.
         else:

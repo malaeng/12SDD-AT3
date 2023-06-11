@@ -160,6 +160,10 @@ class Menu(pygame.Surface): # Menu inherits from pygame.Surface
         for button in self.buttons:
             index = self.buttons.index(button)
 
+            if len(self.buttons) == 1:
+                 self.current_center = len(self.element_centers) - int(len(self.element_centers)/6)
+
+
             # Stack all buttons on top of each other
             if self.stack:
                 button_rect = button.get_rect(center = (self.width/2, self.element_centers[self.current_center]))

@@ -53,7 +53,7 @@ class Game:
             Level( # Level 1
                 screen_size = (screen_width, screen_height),
                 title = "Level 1",
-                text = "You comandeer a small rebel vessel tasked with delivering secret plans to the rebel base located on the other side of the sector. This asteroid field may allow you to stay undetected, but watch out for rebel scouts",
+                text = "You comandeer a small rebel vessel tasked with delivering secret plans to the rebel base located on the other side of the sector. This asteroid field may allow you to stay undetected, but watch out for rebel scouts. Use left and right arrow keys to move, and space to shoot.",
                 asteroids = 25,
                 fighters = 0,
                 scouts = 5,

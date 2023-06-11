@@ -90,7 +90,7 @@ class Level:
 
         # Spawns the enemy at the top of the screen with a random x-position
         spawn_x = random.randint(0, self.screen_size[0])
-        self.current_enemies.add(Enemy(enemy_class, (spawn_x, -20), self.screen_size[1], self.enemy_lasers))
+        self.current_enemies.add(Enemy(enemy_class, (spawn_x, -20), self.screen_size[1], self.screen_size[0], self.enemy_lasers))
 
     def update(self, SFX_on):
         self.spawn_handler(SFX_on)
